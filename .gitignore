@@ -11,3 +11,8 @@
 patches.map
 build/
 .vscode/settings.json
+runtime/assets
+runtime/mod_config
+runtime/mods
+runtime/*.json
+runtime/*.json.bak
