@@ -34,7 +34,8 @@ minimum_recomp_version = "1.2.0"
 dependencies = [
 # Example dependency:
 #    "modname:1.0.0"
-    "mm_recomp_chaos_framework"
+    "mm_recomp_chaos_framework",
+    "MM_EZ_Text_Replacer_API:2.0.0"
 ]
 
 # Native libraries (e.g. DLLs) and the functions they export.

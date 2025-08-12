@@ -2,9 +2,7 @@
 
 void Yeet_Start(GraphicsContext* gfxCtx, GameState* gameState) {
     PlayState* play = (PlayState*)gameState;
-
     Player* player = GET_PLAYER(play);
-    Player_PlaySfx(player, NA_SE_EV_EXPLOSION);
 }
 
 bool lastFrameHeld = false;
@@ -48,9 +46,5 @@ ChaosEffect yeet = {
 
 RECOMP_CALLBACK("mm_recomp_chaos_framework", chaos_on_init)
 void register_yeet() {
-    chaos_register_effect(&yeet, CHAOS_DISTURBANCE_VERY_LOW, NULL);
     chaos_register_effect(&yeet, CHAOS_DISTURBANCE_LOW, NULL);
-    chaos_register_effect(&yeet, CHAOS_DISTURBANCE_MEDIUM, NULL);
-    chaos_register_effect(&yeet, CHAOS_DISTURBANCE_HIGH, NULL);
-    chaos_register_effect(&yeet, CHAOS_DISTURBANCE_VERY_HIGH, NULL);
 }
