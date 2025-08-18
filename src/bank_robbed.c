@@ -34,6 +34,7 @@ void BankRobbed_Start(PlayState* play) {
         Message_GetState(&play->msgCtx) != TEXT_STATE_NONE ||
         play->transitionTrigger != TRANS_TRIGGER_OFF ||
         play->gameOverCtx.state != GAMEOVER_INACTIVE ||
+        GET_PLAYER(play)->stateFlags1 & ~PLAYER_STATE1_20 ||
         HS_GET_BANK_RUPEES() < 50 // We don't rob broke people
     ) return;
 

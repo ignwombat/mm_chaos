@@ -56,6 +56,20 @@ static EntranceSceneId disallowedWarps[] = {
     ENTR_SCENE_BENEATH_THE_WELL,
     ENTR_SCENE_WOODS_OF_MYSTERY,
     ENTR_SCENE_SOUTHERN_SWAMP_CLEARED,
+    ENTR_SCENE_TREASURE_CHEST_SHOP,
+    ENTR_SCENE_SECRET_SHRINE,
+    ENTR_SCENE_DEKU_SCRUB_PLAYGROUND,
+    ENTR_SCENE_DEKU_SHRINE,
+    ENTR_SCENE_MOUNTAIN_SMITHY,
+    ENTR_SCENE_FAIRY_FOUNTAIN,
+    ENTR_SCENE_ASTRAL_OBSERVATORY,
+    ENTR_SCENE_NORTH_CLOCK_TOWN,
+    ENTR_SCENE_GORON_VILLAGE_SPRING,
+    ENTR_SCENE_GORON_VILLAGE_WINTER,
+    ENTR_SCENE_GORON_GRAVERYARD,
+    ENTR_SCENE_DOGGY_RACETRACK,
+    ENTR_SCENE_STONE_TOWER,
+    ENTR_SCENE_DEKU_KINGS_CHAMBER,
 
 
     // Crashes
@@ -66,6 +80,7 @@ static EntranceSceneId disallowedWarps[] = {
     // Too annoying
     ENTR_SCENE_LOST_WOODS,
     ENTR_SCENE_GREAT_BAY_CUTSCENE,
+    ENTR_SCENE_PINNACLE_ROCK,
     
     // Progression
     ENTR_SCENE_CLOCK_TOWER_ROOFTOP,
@@ -107,26 +122,35 @@ BAD_SPAWNS(
     // Crashes + etc
     BAD_SPAWN(IKANA_GRAVEYARD, 1, 5), // 5 = captain ending cutscene
     BAD_SPAWN(TWINMOLDS_LAIR, 4),
-    BAD_SPAWN(STONE_TOWER_TEMPLE_INVERTED, 2),
+    BAD_SPAWN(STONE_TOWER_TEMPLE_INVERTED, 2, 3), // 3 = Twinmold entrance
+    BAD_SPAWN(STONE_TOWER, 1),
     BAD_SPAWN(LAUNDRY_POOL, 2),
     BAD_SPAWN(GORON_VILLAGE_SPRING, 1, 3), // 3 = softlock
     BAD_SPAWN(DEKU_SHRINE, 2),
-    BAD_SPAWN(PIRATES_FORTRESS_INTERIOR, 15),
+    BAD_SPAWN(PIRATES_FORTRESS_INTERIOR, 11, 12, 13, 15, 32), // 11 = JP spawn?
+    BAD_SPAWN(PIRATES_FORTRESS, 9, 11), // 9, 11 = Softlock
+    BAD_SPAWN(GREAT_BAY_TEMPLE, 1, 2, 6), // 1, 6 = long entry cutscene
+    BAD_SPAWN(NORTH_CLOCK_TOWN, 12),
 
     // Softlocks
 
     // Too annoying
-    BAD_SPAWN(OPENING_DUNGEON, 0, 2), // 0 = Fall, 2 = Turned into deku scrub
+    BAD_SPAWN(OPENING_DUNGEON, 0, 2, 4), // 0 = Fall, 2 = Turned into deku scrub, 4 = First cycle reset
     BAD_SPAWN(GORON_RACETRACK, 1), // Race start
     BAD_SPAWN(TERMINA_FIELD, 12), // Moon crash
+    BAD_SPAWN(CLOCK_TOWER_INTERIOR, 2, 6), // 2 = Deku mask drop, 6 = Long ahh dialog with mask salesman
+    BAD_SPAWN(DEKU_KINGS_CHAMBER, 2),
+    BAD_SPAWN(IKANA_CANYON, 10), // Joining the dead
+    BAD_SPAWN(GREAT_BAY_COAST, 3), // Middle of the water
+    BAD_SPAWN(WATERFALL_RAPIDS, 0, 1, 2),
 
     // Progression
     BAD_SPAWN(GORON_GRAVERYARD, 1), // Goron mask drop
-    BAD_SPAWN(WATERFALL_RAPIDS, 0),
-    BAD_SPAWN(FAIRY_FOUNTAIN, 5, 6, 8), // Fairy fountain items+upgrades
+    BAD_SPAWN(FAIRY_FOUNTAIN, 5, 6, 7, 8), // Fairy fountain items+upgrades
+    BAD_SPAWN(ROMANI_RANCH, 1), // 1 = Eponas song
+    BAD_SPAWN(WOODFALL_TEMPLE, 1, 2) // Deku princess
 
     // Bosses
-    BAD_SPAWN(STONE_TOWER_TEMPLE_INVERTED, 3) // Twinmold entrance
 );
 
 static bool WarpIsBad(EntranceSceneId entrance) {
@@ -199,7 +223,6 @@ EntranceResult FindRandomEntrance(u8 failedAttempts) {
         }
     }
 
-    recomp_printf("sceneIndex = %d\n", sceneIndex);
     SceneEntranceTableEntry* sceneEntry = &sSceneEntranceTable[sceneIndex];
 
     // Pick random spawn table
@@ -211,7 +234,6 @@ EntranceResult FindRandomEntrance(u8 failedAttempts) {
         return emptyResult;
     }
 
-    recomp_printf("tableCount = %d\n", tableCount);
     // Here we need to generate a new table of EntranceTableEntry only including the allowed spawns
     // Build temporary list of allowed spawns
     EntranceTableEntry* allowedSpawns[MAX_ENTRIES];
@@ -257,8 +279,7 @@ EntranceResult FindRandomEntrance(u8 failedAttempts) {
     };
 }
 
-// List of transition types that don't crash or break
-// Transitions that are commented out are boring or too slow
+// List of transition types that don't crash, break or are too boring
 TransitionType transitionTypes[] = {
     TRANS_TYPE_WIPE,
     TRANS_TYPE_TRIFORCE,
@@ -266,8 +287,6 @@ TransitionType transitionTypes[] = {
     TRANS_TYPE_FADE_WHITE,
     TRANS_TYPE_FADE_BLACK_FAST,
     TRANS_TYPE_FADE_WHITE_FAST,
-    //TRANS_TYPE_FADE_BLACK_SLOW,
-    //TRANS_TYPE_FADE_WHITE_SLOW,
     TRANS_TYPE_WIPE_FAST,
     TRANS_TYPE_FILL_WHITE_FAST,
     TRANS_TYPE_FILL_WHITE,
@@ -275,14 +294,18 @@ TransitionType transitionTypes[] = {
     TRANS_TYPE_FADE_GREEN,
     TRANS_TYPE_FADE_BLUE,
     TRANS_TYPE_FADE_DYNAMIC
-    //TRANS_TYPE_WIPE5
 };
 
 RECOMP_EXPORT
+
 u16 wommy_random_warp(PlayState* play) {
     if (
         play->transitionTrigger != TRANS_TRIGGER_OFF ||
-        play->gameOverCtx.state != GAMEOVER_INACTIVE
+        play->gameOverCtx.state != GAMEOVER_INACTIVE ||
+        (
+            GET_PLAYER(play)->stateFlags1 & ~PLAYER_STATE1_20 && // Otherwise busy?
+            GET_PLAYER(play)->stateFlags1 & ~PLAYER_STATE1_8000000 // Swimming
+        )
     ) return 0;
 
     // Pick a random scene from the table
@@ -293,9 +316,27 @@ u16 wommy_random_warp(PlayState* play) {
     Scene_SetExitFade(play);
 
     TransitionType transType = transitionTypes[Rand_Next() % (ARRAY_COUNT(transitionTypes))];
+    TransitionType transEndType = transType;
 
-    gSaveContext.nextTransitionType = transType;
+    recomp_printf(
+        "Transitionflags %u\nu8 flags: %u\nShifted flags: %u\n",
+        randomEntrance.transitionFlags,
+        randomEntrance.transitionFlags & 0xFF,
+        randomEntrance.transitionFlags >> 8
+    );
+
+    // The last 6 bytes of the u16 is the end transition type
+    u8 actualTransition = randomEntrance.transitionFlags & 0x1F;
+    if (actualTransition != TRANS_TYPE_CIRCLE)
+        for (u8 i = 0; i < ARRAY_COUNT(transitionTypes); i++) {
+            if (transitionTypes[i] == actualTransition) {
+                transEndType = actualTransition;
+                break;
+            }
+        }
+    
     play->transitionType = transType;
+    gSaveContext.nextTransitionType = transEndType;
 
     play->transitionTrigger = TRANS_TRIGGER_START;
     gSaveContext.respawnFlag = 0;
@@ -303,18 +344,30 @@ u16 wommy_random_warp(PlayState* play) {
     return play->nextEntrance;
 }
 
-void Warp_Start(PlayState* play) {
-    wommy_random_warp(play);
+ChaosEffectEntity *randomWarpEntity;
+void RandomWarp_Start(PlayState* play) {
+    if (wommy_random_warp(play) == 0) {
+        chaos_stop_effect(randomWarpEntity);
+        return;
+    }
+
     Audio_PlaySfx(NA_SE_EN_PO_LAUGH);
 }
 
 ChaosEffect randomWarp = {
     .name = "Wommy Random Warp",
     .duration = 20 * 6, // 6 seconds
-    .on_start_fun = Warp_Start
+    .on_start_fun = RandomWarp_Start
 };
 
 RECOMP_CALLBACK("mm_recomp_chaos_framework", chaos_on_init)
 void register_random_warp() {
-    chaos_register_effect(&randomWarp, CHAOS_DISTURBANCE_NIGHTMARE, NULL);
+    //randomWarpEntity = chaos_register_effect(&randomWarp, CHAOS_DISTURBANCE_NIGHTMARE, NULL);
+}
+
+RECOMP_HOOK("Play_Update")
+void on_update(PlayState* play) {
+    Input* controller = CONTROLLER1(&play->state);
+    if (CHECK_BTN_ALL(controller->press.button, BTN_L))
+        wommy_random_warp(play);
 }

@@ -100,7 +100,8 @@ void QuickMaths_Start(PlayState* play) {
         Message_GetState(&play->msgCtx) != TEXT_STATE_NONE ||
         player->tatlTextId != 0 ||
         play->transitionTrigger != TRANS_TRIGGER_OFF ||
-        play->gameOverCtx.state != GAMEOVER_INACTIVE
+        play->gameOverCtx.state != GAMEOVER_INACTIVE ||
+        player->stateFlags1 & ~PLAYER_STATE1_20
     ) return;
 
     isQuickMaths = true;
@@ -120,6 +121,7 @@ void QuickMaths_Update(PlayState* play) {
     MessageContext* msgCtx = &play->msgCtx;
     
     if (msgCtx->currentTextId != EZTR_GET_ID_H(quick_maths_msg)) {
+        // You've been saved...
         isQuickMaths = false;
         chaos_stop_effect(quickMathsEntity);
     }

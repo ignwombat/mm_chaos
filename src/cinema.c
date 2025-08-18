@@ -206,16 +206,22 @@ void UpdateCinemaState() {
     }
 }
 
+static ChaosEffectEntity *cinemaEntity;
 void Cinema_Start(PlayState* play) {
+    if (play->transitionTrigger != TRANS_TRIGGER_OFF) {
+        chaos_stop_effect(cinemaEntity);
+        return;
+    }
+    
     Player* plr = GET_PLAYER(play);
 
     cinemaAlpha = 0;
     cinemaState = CINEMA_FADING_IN;
 
-    Audio_PlaySfx(NA_SE_IT_BIG_BOMB_EXPLOSION);
-    Audio_PlaySfx(NA_SE_IT_BOMB_EXPLOSION);
-    Audio_PlaySfx(NA_SE_IT_BOMB_EXPLOSION2);
-    Audio_PlaySfx(NA_SE_EV_EXPLSION_LONG);
+    Audio_PlaySfx_2(NA_SE_IT_BIG_BOMB_EXPLOSION);
+    Audio_PlaySfx_2(NA_SE_IT_BOMB_EXPLOSION);
+    Audio_PlaySfx_2(NA_SE_IT_BOMB_EXPLOSION2);
+    Audio_PlaySfx_2(NA_SE_EV_EXPLSION_LONG);
 }
 
 void Cinema_Update(PlayState* play) {
@@ -237,5 +243,5 @@ ChaosEffect cinema = {
 
 RECOMP_CALLBACK("mm_recomp_chaos_framework", chaos_on_init)
 void register_binema() {
-    chaos_register_effect(&cinema, CHAOS_DISTURBANCE_MEDIUM, &CHAOS_TAG_IMAGE);
+    cinemaEntity = chaos_register_effect(&cinema, CHAOS_DISTURBANCE_MEDIUM, &CHAOS_TAG_IMAGE);
 }

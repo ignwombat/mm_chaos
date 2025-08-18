@@ -15,11 +15,14 @@ display_name = "Wommy's Chaos"
 
 # The description that will show up when this mod is displayed in the mod menu. This should be human readable.
 description =  """
-My chaos additions"""
+Wommy's cursed chaos additions
+
+You might want to get a calc...
+(calc is short for calculator)"""
 
 # A short description that will show up in this mod's entry in the mod list. This should be human readable and kept short
 # to prevent it from being cut off due to the limited space.
-short_description = "My chaos additions"
+short_description = "Wommy's cursed chaos additions"
 
 # Authors of this mod.
 authors = [ "IgnWombat" ]
@@ -36,7 +39,7 @@ dependencies = [
 #    "modname:1.0.0"
     "mm_recomp_chaos_framework:0.0.0",
     "MM_EZ_Text_Replacer_API:2.0.0",
-    "magemods_audio_api:0.4.0"
+    #"magemods_audio_api:0.4.0"
 ]
 
 # Native libraries (e.g. DLLs) and the functions they export.
@@ -62,30 +65,3 @@ data_reference_syms_files = [ "Zelda64RecompSyms/mm.us.rev1.datasyms.toml", "Zel
 additional_files = [
     "thumb.png"
 ]
-
-[[manifest.config_options]]
-id = "enum_option"
-name = "Enum Option"
-description = "Test enum config option"
-type = "Enum"
-options = [ "First", "Second" ]
-default = "First"
-
-[[manifest.config_options]]
-id = "number_option"
-name = "Number Option"
-description = "Test number config option."
-type = "Number"
-min = 0
-max = 10
-step = 0.1
-precision = 1
-percent = false
-default = 1
-
-[[manifest.config_options]]
-id = "string_option"
-name = "String Option"
-description = "Test string config option."
-type = "String"
-default = "Lorem Ipsum"

@@ -54,7 +54,7 @@ void Bazinga_Start(PlayState* play) {
 }
 
 void Bazinga_Update(PlayState* play) {
-    if (!isBazinga) {
+    if (!isBazinga || play->transitionTrigger != TRANS_TRIGGER_OFF) {
         chaos_stop_effect(bazingaEntity);
         return;
     };

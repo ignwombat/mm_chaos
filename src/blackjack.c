@@ -273,16 +273,17 @@ EZTR_ON_INIT void init_blackjack() {
 }
 
 void Blackjack_Start(PlayState* play) {
+    Player* player = GET_PLAYER(play);
+
     // Various checks to make sure blackjack can be played
     if (
         blackjackState != BLACKJACK_NONE ||
         Message_GetState(&play->msgCtx) != TEXT_STATE_NONE ||
         play->transitionTrigger != TRANS_TRIGGER_OFF ||
         play->gameOverCtx.state != GAMEOVER_INACTIVE ||
+        player->stateFlags1 & ~PLAYER_STATE1_20 ||
         gSaveContext.save.saveInfo.playerData.rupees < 10
     ) return;
-
-    Player* player = GET_PLAYER(play);
 
     // Initial 2 cards each
     Blackjack_ResetHands();

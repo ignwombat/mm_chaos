@@ -2,7 +2,7 @@
 
 static ChaosMachineSettings chaosSettingsPassive = {
     .name = "Wommy Passive Effects",
-    .cycle_length = 20 * 10,
+    .cycle_length = 20 * 60, // 60 seconds
     .default_groups_settings = {
         { /* CHAOS_DISTURBANCE_VERY_LOW */
             .initial_probability = 0.3f,
