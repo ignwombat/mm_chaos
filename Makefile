@@ -59,6 +59,6 @@ nrm:
 	copy /Y $(BUILD_DIR)\\wommy_chaos.nrm "runtime\mods\"
 
 run:
-	cd runtime && B:\Programs\Zelda64Recompiled-v1.2.0-Windows\debug-build\Zelda64Recompiled.exe --showConsole
+	cd runtime && B:\Programs\Zelda64Recompiled-v1.2.0-Windows\debug-build-1.2\Zelda64Recompiled.exe --showConsole
 
 play: all nrm run	

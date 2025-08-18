@@ -1,0 +1,9 @@
+#ifndef __CHAOS_EXCLUSIVITY__
+#define __CHAOS_EXCLUSIVITY__
+
+#define CHAOS_DURATION_MAX 4294967295
+
+extern char *CHAOS_TAG_DIALOG;
+extern char *CHAOS_TAG_IMAGE;
+
+#endif

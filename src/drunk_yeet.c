@@ -4,8 +4,9 @@ static Actor* heldItem;
 static bool lastFrameHeld = false;
 static bool isExplosive = false;
 
-void Yeet_Update(PlayState* play) {
+void DrunkYeet_Update(PlayState* play) {
     Player* player = GET_PLAYER(play);
+
     bool currentlyHeld = player->stateFlags1 & PLAYER_STATE1_CARRYING_ACTOR;
 
     if (!lastFrameHeld && currentlyHeld) {
@@ -15,21 +16,20 @@ void Yeet_Update(PlayState* play) {
 
     else if (lastFrameHeld && !currentlyHeld) {
         if (isExplosive) {
-            heldItem->gravity *= 0.7f;
-            heldItem->speed *= 4;
+            heldItem->world.rot.y = Rand_ZeroFloat(0x10000);
         }
     }
 
     lastFrameHeld = currentlyHeld;
 }
 
-ChaosEffect yeet = {
-    .name = "Wommy YEET",
+ChaosEffect drunkYeet = {
+    .name = "Wommy Drunk YEET",
     .duration = 20 * 60, // 60 seconds
-    .update_fun = Yeet_Update
+    .update_fun = DrunkYeet_Update
 };
 
 RECOMP_CALLBACK(".", chaos_on_init_passive_effects)
-void register_yeet(ChaosMachine* machine) {
-    chaos_register_effect_to(machine, &yeet, CHAOS_DISTURBANCE_VERY_LOW, NULL);
+void register_drunk_yeet(ChaosMachine* machine) {
+    chaos_register_effect_to(machine, &drunkYeet, CHAOS_DISTURBANCE_VERY_LOW, NULL);
 }

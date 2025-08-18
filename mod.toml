@@ -34,8 +34,9 @@ minimum_recomp_version = "1.2.0"
 dependencies = [
 # Example dependency:
 #    "modname:1.0.0"
-    "mm_recomp_chaos_framework",
-    "MM_EZ_Text_Replacer_API:2.0.0"
+    "mm_recomp_chaos_framework:0.0.0",
+    "MM_EZ_Text_Replacer_API:2.0.0",
+    "magemods_audio_api:0.4.0"
 ]
 
 # Native libraries (e.g. DLLs) and the functions they export.
@@ -58,7 +59,9 @@ func_reference_syms_file = "Zelda64RecompSyms/mm.us.rev1.syms.toml"
 data_reference_syms_files = [ "Zelda64RecompSyms/mm.us.rev1.datasyms.toml", "Zelda64RecompSyms/mm.us.rev1.datasyms_static.toml" ]
 
 # Additional files to include in the mod.
-additional_files = [ ]
+additional_files = [
+    "thumb.png"
+]
 
 [[manifest.config_options]]
 id = "enum_option"

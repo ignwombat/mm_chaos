@@ -1,44 +1,43 @@
 #include "overlays/actors/ovl_En_Bom/z_en_bom.h"
 #include "chaos.h"
+#include "wommyutils.h"
 
 void Spawn_Bomb(PlayState* play, Player* player) {
     Vec3f* playerPos = &player->actor.world.pos;
+
+    // Place the bomb in front of the player LOOL
+    Vec2f direction = ActorDirection(&player->actor);
+    f32 distance = 100 + Rand_ZeroFloat(150);
 
     EnBom* bomb = (EnBom*)Actor_Spawn(
         &play->actorCtx,
         play,
         ACTOR_EN_BOM,
-        playerPos->x,
-        playerPos->y,
-        playerPos->z,
+        playerPos->x + direction.x * distance,
+        playerPos->y + 170,
+        playerPos->z + direction.z * distance,
         BOMB_EXPLOSIVE_TYPE_POWDER_KEG,
         0,
         0,
         BOMB_TYPE_BODY
     );
 
-    bomb->timer = 80 + Rand_ZeroFloat(80);
-
-    bomb->actor.world.pos.y += 150;
-    bomb->actor.velocity.y = 0;
-
-    // TODO place bomb in front of player based on direction
+    if (bomb != NULL) {
+        bomb->timer = 80 + Rand_ZeroFloat(80);
+        bomb->actor.velocity.y = 0;
+    }
 }
 
-u8 bombInterval = 35; // Frame interval for how often bombs should spawn
-u8 bombTimer = 0;
+static const u8 bombInterval = 37; // Frame interval for how often bombs should spawn
+static u8 bombTimer = 0;
 
-void Bombing_Start(GraphicsContext* gfxCtx, GameState* gameState) {
-    PlayState* play = (PlayState*)gameState;
+void Bombing_Start(PlayState* play) {
     Player* player = GET_PLAYER(play);
-    Vec3f* playerPos = &player->actor.world.pos;
     
     bombTimer = 1;
-    Player_PlaySfx(player, NA_SE_EN_STAL01_LAUGH);
 }
 
-void Bombing_Update(GraphicsContext* gfxCtx, GameState* gameState) {
-    PlayState* play = (PlayState*)gameState;
+void Bombing_Update(PlayState* play) {
     Player* player = GET_PLAYER(play);
 
     bombTimer--;
@@ -48,19 +47,14 @@ void Bombing_Update(GraphicsContext* gfxCtx, GameState* gameState) {
     }
 }
 
-void Bombing_End(GraphicsContext* gfxCtx, GameState* gameState) {
-    
-}
-
 ChaosEffect bombing = {
-    .name = "Bombing",
-    .duration = 20 * 15, // 15 seconds
+    .name = "Wommy Bombing",
+    .duration = 20 * 13, // 13 seconds
     .on_start_fun = Bombing_Start,
-    .update_fun = Bombing_Update,
-    .on_end_fun = Bombing_End
+    .update_fun = Bombing_Update
 };
 
 RECOMP_CALLBACK("mm_recomp_chaos_framework", chaos_on_init)
 void register_bombing() {
-    chaos_register_effect(&bombing, CHAOS_DISTURBANCE_VERY_HIGH, NULL);
+    chaos_register_effect(&bombing, CHAOS_DISTURBANCE_HIGH, NULL);
 }

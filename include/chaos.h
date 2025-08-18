@@ -2,10 +2,9 @@
 #define __CHAOS_DEP_H__
 
 #include "modding.h"
-#include "recomputils.h"
 #include "global.h"
 
-typedef void (*ChaosFunction)(GraphicsContext* gfxCtx, GameState* gameState);
+typedef void (*ChaosFunction)(PlayState* play);
 
 typedef enum {
     CHAOS_DISTURBANCE_VERY_LOW,
@@ -13,6 +12,8 @@ typedef enum {
     CHAOS_DISTURBANCE_MEDIUM,
     CHAOS_DISTURBANCE_HIGH,
     CHAOS_DISTURBANCE_VERY_HIGH,
+    CHAOS_DISTURBANCE_NIGHTMARE,
+    CHAOS_DISTURBANCE_MAX,
 } ChaosDisturbance;
 
 typedef struct {
@@ -24,6 +25,32 @@ typedef struct {
     ChaosFunction on_end_fun;
 } ChaosEffect;
 
-RECOMP_IMPORT("mm_recomp_chaos_framework", void chaos_register_effect(ChaosEffect* effect, ChaosDisturbance disturbance, char** exclusivity_tags))
+typedef void ChaosEffectEntity;
+
+typedef struct {
+    f32 initial_probability;
+    f32 on_pick_multiplier;
+    f32 winner_weight_share;
+} ChaosGroupSettings;
+
+typedef struct {
+    char* name;
+    u32 cycle_length; // In frames.
+    ChaosGroupSettings default_groups_settings[CHAOS_DISTURBANCE_MAX];
+} ChaosMachineSettings;
+
+typedef void ChaosMachine;
+
+RECOMP_IMPORT("mm_recomp_chaos_framework", ChaosEffectEntity* chaos_register_effect(ChaosEffect* effect, ChaosDisturbance disturbance, char** exclusivity_tags))
+RECOMP_IMPORT("mm_recomp_chaos_framework", ChaosEffectEntity* chaos_register_effect_to(ChaosMachine* machine, const ChaosEffect* effect, ChaosDisturbance disturbance, const char** exclusivity_tags))
+RECOMP_IMPORT("mm_recomp_chaos_framework", ChaosMachine* chaos_register_machine(ChaosMachineSettings* settings))
+
+RECOMP_IMPORT("mm_recomp_chaos_framework", void chaos_enable_effect(ChaosEffectEntity* entity))
+RECOMP_IMPORT("mm_recomp_chaos_framework", void chaos_disable_effect(ChaosEffectEntity* entity))
+
+RECOMP_IMPORT("mm_recomp_chaos_framework", void chaos_request_roll(ChaosMachine* machine))
+RECOMP_IMPORT("mm_recomp_chaos_framework", void chaos_request_group_roll(ChaosMachine* machine, ChaosDisturbance disturbance))
+
+RECOMP_IMPORT("mm_recomp_chaos_framework", void chaos_stop_effect(ChaosEffectEntity* entity))
 
 #endif /* __CHAOS_DEP_H__ */

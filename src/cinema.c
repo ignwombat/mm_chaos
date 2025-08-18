@@ -1,4 +1,5 @@
 #include "chaos.h"
+#include "chaos_exclusivity.h"
 #include "assets/cinema.h"
 #include <string.h>
 
@@ -27,7 +28,7 @@ const u8 fadeInSpeed = 32;
 const u8 fadeOutSpeed = 20;
 const u8 cinemaFrameCount = 20;
 
-u16* CinemaTiles[TILES_Y][TILES_X] = {
+static u16* CinemaTiles[TILES_Y][TILES_X] = {
     { Cinema1_1,  Cinema2_1,  Cinema3_1,  Cinema4_1 },
     { Cinema1_2,  Cinema2_2,  Cinema3_2,  Cinema4_2 },
     { Cinema1_3,  Cinema2_3,  Cinema3_3,  Cinema4_3 },
@@ -35,11 +36,11 @@ u16* CinemaTiles[TILES_Y][TILES_X] = {
 };
 
 // New split tile storage
-u16 CinemaTiles_TopData[TILES_Y][TILES_X][HALF_TILE_SIZE];
-u16 CinemaTiles_BottomData[TILES_Y][TILES_X][HALF_TILE_SIZE];
+static u16 CinemaTiles_TopData[TILES_Y][TILES_X][HALF_TILE_SIZE];
+static u16 CinemaTiles_BottomData[TILES_Y][TILES_X][HALF_TILE_SIZE];
 
-u16* CinemaTiles_Top[TILES_Y][TILES_X];
-u16* CinemaTiles_Bottom[TILES_Y][TILES_X];
+static u16* CinemaTiles_Top[TILES_Y][TILES_X];
+static u16* CinemaTiles_Bottom[TILES_Y][TILES_X];
 
 void SplitAllCinemaTiles(void) {
     for (s32 y = 0; y < TILES_Y; y++) {
@@ -205,35 +206,29 @@ void UpdateCinemaState() {
     }
 }
 
-void Cinema_Start(GraphicsContext* gfxCtx, GameState* gameState) {
-    PlayState* play = (PlayState*)gameState;
+void Cinema_Start(PlayState* play) {
     Player* plr = GET_PLAYER(play);
 
     cinemaAlpha = 0;
     cinemaState = CINEMA_FADING_IN;
 
-    Player_PlaySfx(plr, NA_SE_IT_BIG_BOMB_EXPLOSION);
-    Player_PlaySfx(plr, NA_SE_IT_BOMB_EXPLOSION);
-    Player_PlaySfx(plr, NA_SE_IT_BOMB_EXPLOSION2);
-    Player_PlaySfx(plr, NA_SE_EV_EXPLSION_LONG);
+    Audio_PlaySfx(NA_SE_IT_BIG_BOMB_EXPLOSION);
+    Audio_PlaySfx(NA_SE_IT_BOMB_EXPLOSION);
+    Audio_PlaySfx(NA_SE_IT_BOMB_EXPLOSION2);
+    Audio_PlaySfx(NA_SE_EV_EXPLSION_LONG);
 }
 
-void Cinema_Update(GraphicsContext* gfxCtx, GameState* gameState) {
+void Cinema_Update(PlayState* play) {
     if (cinemaState == CINEMA_OFF) return;
-
-    PlayState* play = (PlayState*)gameState;
-    Player* player = GET_PLAYER(play);
-
     UpdateCinemaState();
 }
 
-void Cinema_End(GraphicsContext* gfxCtx, GameState* gameState) {
-    PlayState* play = (PlayState*)gameState;
+void Cinema_End(PlayState* play) {
     cinemaState = CINEMA_OFF;
 }
 
 ChaosEffect cinema = {
-    .name = "CINEMA",
+    .name = "Wommy CINEMA",
     .duration = (255 / fadeInSpeed) + cinemaFrameCount + (255 / fadeOutSpeed),
     .on_start_fun = Cinema_Start,
     .update_fun = Cinema_Update,
@@ -242,5 +237,5 @@ ChaosEffect cinema = {
 
 RECOMP_CALLBACK("mm_recomp_chaos_framework", chaos_on_init)
 void register_binema() {
-    chaos_register_effect(&cinema, CHAOS_DISTURBANCE_MEDIUM, NULL);
+    chaos_register_effect(&cinema, CHAOS_DISTURBANCE_MEDIUM, &CHAOS_TAG_IMAGE);
 }
