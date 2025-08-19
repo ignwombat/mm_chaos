@@ -20,7 +20,7 @@ static EntranceSceneId disallowedWarps[] = {
     ENTR_SCENE_UNSET_37,
 
     // These work, but are temporarily disabled for debugging purposes
-    ENTR_SCENE_MAYORS_RESIDENCE,
+    /*ENTR_SCENE_MAYORS_RESIDENCE,
     ENTR_SCENE_MAGIC_HAGS_POTION_SHOP,
     ENTR_SCENE_GORON_SHOP,
     ENTR_SCENE_GORON_SHRINE,
@@ -55,7 +55,7 @@ static EntranceSceneId disallowedWarps[] = {
     ENTR_SCENE_GORON_RACETRACK,
     ENTR_SCENE_BENEATH_THE_WELL,
     ENTR_SCENE_WOODS_OF_MYSTERY,
-    ENTR_SCENE_SOUTHERN_SWAMP_CLEARED,
+    //ENTR_SCENE_SOUTHERN_SWAMP_CLEARED,
     ENTR_SCENE_TREASURE_CHEST_SHOP,
     ENTR_SCENE_SECRET_SHRINE,
     ENTR_SCENE_DEKU_SCRUB_PLAYGROUND,
@@ -70,6 +70,7 @@ static EntranceSceneId disallowedWarps[] = {
     ENTR_SCENE_DOGGY_RACETRACK,
     ENTR_SCENE_STONE_TOWER,
     ENTR_SCENE_DEKU_KINGS_CHAMBER,
+    ENTR_SCENE_GREAT_BAY_TEMPLE,*/
 
 
     // Crashes
@@ -127,8 +128,8 @@ BAD_SPAWNS(
     BAD_SPAWN(LAUNDRY_POOL, 2),
     BAD_SPAWN(GORON_VILLAGE_SPRING, 1, 3), // 3 = softlock
     BAD_SPAWN(DEKU_SHRINE, 2),
-    BAD_SPAWN(PIRATES_FORTRESS_INTERIOR, 11, 12, 13, 15, 32), // 11 = JP spawn?
-    BAD_SPAWN(PIRATES_FORTRESS, 9, 11), // 9, 11 = Softlock
+    BAD_SPAWN(PIRATES_FORTRESS_INTERIOR, 11, 12, 13, 14, 15, 32), // 11 = JP spawn?
+    BAD_SPAWN(PIRATES_FORTRESS, 9, 11, 14), // 9, 11 = Softlock
     BAD_SPAWN(GREAT_BAY_TEMPLE, 1, 2, 6), // 1, 6 = long entry cutscene
     BAD_SPAWN(NORTH_CLOCK_TOWN, 12),
 
@@ -138,9 +139,9 @@ BAD_SPAWNS(
     BAD_SPAWN(OPENING_DUNGEON, 0, 2, 4), // 0 = Fall, 2 = Turned into deku scrub, 4 = First cycle reset
     BAD_SPAWN(GORON_RACETRACK, 1), // Race start
     BAD_SPAWN(TERMINA_FIELD, 12), // Moon crash
-    BAD_SPAWN(CLOCK_TOWER_INTERIOR, 2, 6), // 2 = Deku mask drop, 6 = Long ahh dialog with mask salesman
+    BAD_SPAWN(CLOCK_TOWER_INTERIOR, 2, 4, 6), // 2 = Deku mask drop, 4, 6 = Long ahh dialog with mask salesman
     BAD_SPAWN(DEKU_KINGS_CHAMBER, 2),
-    BAD_SPAWN(IKANA_CANYON, 10), // Joining the dead
+    BAD_SPAWN(IKANA_CANYON, 9, 10), // 9 = Music box playing, 10 = Joining the dead
     BAD_SPAWN(GREAT_BAY_COAST, 3), // Middle of the water
     BAD_SPAWN(WATERFALL_RAPIDS, 0, 1, 2),
 
@@ -234,7 +235,6 @@ EntranceResult FindRandomEntrance(u8 failedAttempts) {
         return emptyResult;
     }
 
-    // Here we need to generate a new table of EntranceTableEntry only including the allowed spawns
     // Build temporary list of allowed spawns
     EntranceTableEntry* allowedSpawns[MAX_ENTRIES];
     u16 allowedCount = 0;
@@ -255,6 +255,7 @@ EntranceResult FindRandomEntrance(u8 failedAttempts) {
         return emptyResult;
     }
 
+    // Pick a random spawn point
     EntranceTableEntry* entry = allowedSpawns[Rand_Next() % allowedCount];
 
     recomp_printf(
@@ -299,12 +300,24 @@ TransitionType transitionTypes[] = {
 RECOMP_EXPORT
 
 u16 wommy_random_warp(PlayState* play) {
+    Player* player = GET_PLAYER(play);
+    u32 stateFlags1 = player->stateFlags1;
+
     if (
         play->transitionTrigger != TRANS_TRIGGER_OFF ||
         play->gameOverCtx.state != GAMEOVER_INACTIVE ||
         (
-            GET_PLAYER(play)->stateFlags1 & ~PLAYER_STATE1_20 && // Otherwise busy?
-            GET_PLAYER(play)->stateFlags1 & ~PLAYER_STATE1_8000000 // Swimming
+            (stateFlags1 & ~PLAYER_STATE1_20 && // Busy
+            !(stateFlags1 & (
+                PLAYER_STATE1_FRIENDLY_ACTOR_FOCUS | // Not Z-targeting a friendly actor
+                PLAYER_STATE1_PARALLEL | // Not parallel Z-targeting
+                PLAYER_STATE1_4 | // Not climbing a ledge
+                PLAYER_STATE1_8000000 // Not swimming
+            )))
+        ) ||
+        (
+            gSaveContext.buttonStatus[EQUIP_SLOT_B] == BTN_DISABLED &&
+            !(stateFlags1 & PLAYER_STATE1_8000000) // Not swimming
         )
     ) return 0;
 
@@ -318,16 +331,18 @@ u16 wommy_random_warp(PlayState* play) {
     TransitionType transType = transitionTypes[Rand_Next() % (ARRAY_COUNT(transitionTypes))];
     TransitionType transEndType = transType;
 
-    recomp_printf(
+    /*recomp_printf(
         "Transitionflags %u\nu8 flags: %u\nShifted flags: %u\n",
         randomEntrance.transitionFlags,
         randomEntrance.transitionFlags & 0xFF,
         randomEntrance.transitionFlags >> 8
-    );
+    );*/
 
     // The last 6 bytes of the u16 is the end transition type
-    u8 actualTransition = randomEntrance.transitionFlags & 0x1F;
-    if (actualTransition != TRANS_TYPE_CIRCLE)
+    TransitionType actualTransition = randomEntrance.transitionFlags & 0x1F;
+    if (actualTransition == TRANS_TYPE_CIRCLE)
+        transEndType = TRANS_TYPE_CIRCLE;
+    else
         for (u8 i = 0; i < ARRAY_COUNT(transitionTypes); i++) {
             if (transitionTypes[i] == actualTransition) {
                 transEndType = actualTransition;
@@ -365,7 +380,7 @@ void register_random_warp() {
     //randomWarpEntity = chaos_register_effect(&randomWarp, CHAOS_DISTURBANCE_NIGHTMARE, NULL);
 }
 
-RECOMP_HOOK("Play_Update")
+//RECOMP_HOOK("Play_Update")
 void on_update(PlayState* play) {
     Input* controller = CONTROLLER1(&play->state);
     if (CHECK_BTN_ALL(controller->press.button, BTN_L))

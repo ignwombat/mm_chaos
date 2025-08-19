@@ -102,11 +102,14 @@ void QuickMaths_Start(PlayState* play) {
         play->transitionTrigger != TRANS_TRIGGER_OFF ||
         play->gameOverCtx.state != GAMEOVER_INACTIVE ||
         player->stateFlags1 & ~PLAYER_STATE1_20
-    ) return;
+    ) {
+        chaos_stop_effect(quickMathsEntity);
+        return;
+    }
 
     isQuickMaths = true;
     playerAnswer = 0;
-    quickMathsTimer = (20 * 14); // Stays for 12 seconds
+    quickMathsTimer = (20 * 14); // Stays for 14 seconds
 
     Message_StartTextbox(play, EZTR_GET_ID_H(quick_maths_msg), NULL);
     GET_PLAYER(play)->stateFlags1 |= PLAYER_STATE1_20;
@@ -119,11 +122,14 @@ void QuickMaths_Update(PlayState* play) {
     };
 
     MessageContext* msgCtx = &play->msgCtx;
+    Player* player = GET_PLAYER(play);
     
     if (msgCtx->currentTextId != EZTR_GET_ID_H(quick_maths_msg)) {
         // You've been saved...
         isQuickMaths = false;
         chaos_stop_effect(quickMathsEntity);
+        player->stateFlags1 &= ~PLAYER_STATE1_20;
+        return;
     }
 
     if (
@@ -150,20 +156,19 @@ void QuickMaths_Update(PlayState* play) {
         return;
     }
 
-    Player* player = GET_PLAYER(play);
     player->stateFlags1 &= ~PLAYER_STATE1_20;
 
     if (playerAnswer != correctAnswer) {
         if (msgCtx->currentTextId == EZTR_GET_ID_H(quick_maths_msg))
             Message_CloseTextbox(play);
 
-        isQuickMaths = false;
         gSaveContext.save.saveInfo.playerData.health = 0;
     }
 
     else
         Audio_PlaySfx(NA_SE_SY_QUIZ_CORRECT);
 
+    isQuickMaths = false;
     chaos_stop_effect(quickMathsEntity);
 }
 
